@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecipEz Mockup - Add Item</title>
+    <style>
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;padding:0;background-color:#EFEFEF;display:flex;justify-content:center;align-items:flex-start;padding-top:30px;height:100vh}
+        .phone-mockup{width:375px;height:750px;background-color:#FFF;border:1px solid #D1D1D1;border-radius:30px;box-shadow:0 4px 15px rgba(0,0,0,.15);display:flex;flex-direction:column;overflow:hidden}
+        .app-header{background-color:#FFF;padding:15px 20px;padding-top:45px;border-bottom:1px solid #F5F5F7;display:flex;align-items:center;justify-content:space-between}
+        .app-header .back-button{background:0 0;border:none;color:#1F2937;font-size:1.5em;cursor:pointer;padding:0 10px 0 0}
+        .app-header h1{margin:0;font-size:1.2em;color:#1F2937;font-weight:600;flex-grow: 1;text-align:center;}
+        .app-header .placeholder{width: 30px;} /* Balance header */
+        .content-area{flex-grow:1;background-color:#F5F5F7;padding:25px;overflow-y:auto}
+        .form-group{margin-bottom:20px}
+        .form-group label{display:block;color:#334155;font-weight:500;margin-bottom:8px;font-size:.9em}
+        .form-group input[type="text"], .form-group select{width:100%;padding:12px 15px;border:1px solid #D1D5DB;background-color:#FFF;border-radius:6px;font-size:1em;color:#1F2937;box-sizing: border-box;}
+        .form-group input[type="text"]:focus, .form-group select:focus{outline:none;border-color:#34D399;box-shadow:0 0 0 2px rgba(52,211,153,0.3)}
+        .category-selector{display:flex;gap:10px;margin-top:8px}
+        .category-selector button{flex:1;padding:10px;border:2px solid #D1D5DB;background-color:#FFF;border-radius:6px;font-size:.9em;cursor:pointer;color:#6B7280;transition: all 0.2s ease;}
+        .category-selector button.selected{border-color:#34D399;background-color:#EBFDF5;color:#067647;font-weight:600}
+        .save-button{width:100%;padding:15px;background-color:#34D399;color:#FFF;font-size:1.1em;font-weight:600;border:none;border-radius:8px;cursor:pointer;margin-top:30px}
+        .save-button:hover{background-color:#25a97a}
+    </style>
+</head>
+<body>
+    <div class="phone-mockup">
+        <div class="app-header">
+             <button class="back-button" title="Back">←</button> <!-- Simple back arrow -->
+             <h1>Add New Item</h1>
+             <div class="placeholder"></div> <!-- Balance the header -->
+        </div>
+        <div class="content-area">
+            <div class="form-group">
+                <label for="item-name">Item Name</label>
+                <input type="text" id="item-name" placeholder="e.g., Chicken Breast">
+            </div>
+             <div class="form-group">
+                <label for="item-quantity">Quantity / Amount</label>
+                <input type="text" id="item-quantity" placeholder="e.g., 2 lbs, 1 container, Half full">
+            </div>
+             <div class="form-group">
+                <label>Category</label>
+                 <div class="category-selector">
+                     <button class="selected">Fridge</button>
+                     <button>Pantry</button>
+                     <button>Freezer</button>
+                     <button>Tool</button>
+                 </div>
+            </div>
+            <button class="save-button">Save Item</button>
+        </div>
+    </div>
+</body>
+</html>

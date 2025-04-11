@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecipEz Mockup - Generate Recipe</title>
+    <style>
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;padding:0;background-color:#EFEFEF;display:flex;justify-content:center;align-items:flex-start;padding-top:30px;height:100vh}
+        .phone-mockup{width:375px;height:750px;background-color:#FFF;border:1px solid #D1D1D1;border-radius:30px;box-shadow:0 4px 15px rgba(0,0,0,.15);display:flex;flex-direction:column;overflow:hidden}
+        .app-header{background-color:#FFF;padding:15px 20px;padding-top:45px;border-bottom:1px solid #F5F5F7;text-align:center}
+        .app-header h1{margin:0;font-size:1.2em;color:#1F2937;font-weight:600}
+        /* Tab bar would go here if using tabs at top, otherwise omit */
+        .content-area{flex-grow:1;background-color:#F5F5F7;padding:25px;overflow-y:auto;display:flex;flex-direction:column}
+        .prompt-label{color:#334155;font-weight:500;margin-bottom:10px;font-size:1em;text-align:center;}
+        .prompt-textarea{flex-grow:1; /* Takes up available space */ min-height:150px; /* Minimum height */ width:100%;padding:15px;border:1px solid #D1D5DB;background-color:#FFF;border-radius:8px;font-size:1em;color:#1F2937;box-sizing: border-box;resize:none;margin-bottom:20px;}
+        .prompt-textarea:focus{outline:none;border-color:#34D399;box-shadow:0 0 0 2px rgba(52,211,153,0.3)}
+        .generate-button{width:100%;padding:15px;background-color:#34D399;color:#FFF;font-size:1.1em;font-weight:600;border:none;border-radius:8px;cursor:pointer;margin-top:auto; /* Pushes button to bottom */}
+        .generate-button:hover{background-color:#25a97a}
+        .loading-indicator{text-align:center;padding:20px;font-size:1em;color:#6B7280;}
+        .loading-indicator span{ /* Basic spinner */ display:inline-block;width:20px;height:20px;border:3px solid rgba(52,211,153,0.3);border-top-color:#34D399;border-radius:50%;animation:spin 1s linear infinite;margin-right:10px;vertical-align:middle;}
+        @keyframes spin{to{transform:rotate(360deg)}}
+    </style>
+</head>
+<body>
+    <div class="phone-mockup">
+        <div class="app-header">
+            <h1>Generate Recipe</h1>
+            <!-- Add Tabs here if Generate is a tab -->
+        </div>
+        <div class="content-area">
+            <label class="prompt-label" for="recipe-prompt">What do you want to make?</label>
+            <textarea id="recipe-prompt" class="prompt-textarea" placeholder="e.g., Quick lunch using leftover chicken for 1 person, make it spicy!"></textarea>
+
+            <!-- Example Loading State (uncomment to view) -->
+            <!--
+            <div class="loading-indicator">
+                <span></span> Generating your recipe...
+            </div>
+            -->
+
+            <button class="generate-button">Generate Recipe</button>
+        </div>
+         <!-- Bottom Nav Bar would go here if Generate is a tab -->
+    </div>
+</body>
+</html>

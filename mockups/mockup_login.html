@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecipEz Mockup - Login</title>
+    <style>
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;padding:0;background-color:#EFEFEF;display:flex;justify-content:center;align-items:center; /* Center vertically */ padding-top:0;height:100vh}
+        .phone-mockup{width:375px;height:750px;background-color:#F5F5F7; /* Light gray background */ border:1px solid #D1D1D1;border-radius:30px;box-shadow:0 4px 15px rgba(0,0,0,.15);display:flex;flex-direction:column;overflow:hidden;justify-content:center; /* Center content vertically */ padding:40px;}
+        .app-logo{text-align:center;margin-bottom:40px;font-size:2.5em;font-weight:bold;color:#34D399;} /* Example logo */
+        .form-group{margin-bottom:20px}
+        .form-group label{display:block;color:#334155;font-weight:500;margin-bottom:8px;font-size:.9em}
+        .form-group input[type="email"], .form-group input[type="password"]{width:100%;padding:14px 15px;border:1px solid #D1D5DB;background-color:#FFF;border-radius:6px;font-size:1em;color:#1F2937;box-sizing: border-box;}
+        .form-group input[type="email"]:focus, .form-group input[type="password"]:focus{outline:none;border-color:#34D399;box-shadow:0 0 0 2px rgba(52,211,153,0.3)}
+        .action-button{width:100%;padding:15px;background-color:#34D399;color:#FFF;font-size:1.1em;font-weight:600;border:none;border-radius:8px;cursor:pointer;margin-top:10px}
+        .action-button:hover{background-color:#25a97a}
+        .secondary-action{text-align:center;margin-top:25px;}
+        .secondary-action a{color:#34D399;text-decoration:none;font-weight:500;font-size:0.9em;}
+        .secondary-action a:hover{text-decoration:underline;}
+        .error-message{color:#DC2626; /* Red */ background-color:#FFE4E6; border: 1px solid #FCA5A5; padding:10px; border-radius:6px; font-size:0.9em; margin-bottom: 15px; text-align: center;}
+    </style>
+</head>
+<body>
+    <div class="phone-mockup">
+        <div class="app-logo">RecipEz</div>
+
+        <!-- Example Error Message (uncomment to view) -->
+        <!-- <div class="error-message">Invalid email or password.</div> -->
+
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="you@example.com">
+        </div>
+         <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+
+        <button class="action-button">Login</button>
+
+        <div class="secondary-action">
+            <a href="#">Don't have an account? Sign Up</a>
+        </div>
+         <div class="secondary-action" style="margin-top: 15px;">
+            <a href="#">Forgot Password?</a>
+        </div>
+    </div>
+</body>
+</html>

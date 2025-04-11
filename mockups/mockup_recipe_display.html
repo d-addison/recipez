@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RecipEz Mockup - Recipe Display</title>
+    <style>
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;margin:0;padding:0;background-color:#EFEFEF;display:flex;justify-content:center;align-items:flex-start;padding-top:30px;height:100vh}
+        .phone-mockup{width:375px;height:750px;background-color:#F5F5F7; /* Light gray overall background */ border:1px solid #D1D1D1;border-radius:30px;box-shadow:0 4px 15px rgba(0,0,0,.15);display:flex;flex-direction:column;overflow:hidden}
+        .app-header{background-color:#FFF;padding:15px 20px;padding-top:45px;border-bottom:1px solid #F5F5F7;display:flex;align-items:center;justify-content:space-between}
+        .app-header .back-button{background:0 0;border:none;color:#1F2937;font-size:1.5em;cursor:pointer;padding:0 10px 0 0}
+        .app-header h1{margin:0;font-size:1.2em;color:#1F2937;font-weight:600;flex-grow:1;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .app-header .action-button{background:0 0;border:none;color:#34D399;font-size:1.4em;cursor:pointer;padding:0 0 0 10px;} /* Save icon style */
+        .content-area{flex-grow:1;padding:0;overflow-y:auto} /* No padding, content blocks handle it */
+        .recipe-title-card{background-color:#FFF;padding:20px;margin-bottom:10px;}
+        .recipe-title-card h2{font-size:1.5em;color:#1F2937;margin:0 0 8px 0;font-weight:600;}
+        .recipe-title-card p.description{font-size:.95em;color:#6B7280;margin:0;}
+        .recipe-details{display:flex;justify-content:space-around;padding:15px;background-color:#EBFDF5; /* Light green background */ margin-bottom:10px;}
+        .detail-item{text-align:center;}
+        .detail-item span{display:block;font-size:.8em;color:#067647;text-transform:uppercase;margin-bottom:4px;font-weight:500;}
+        .detail-item strong{font-size:1em;color:#05603A;font-weight:600;}
+        .recipe-section{background-color:#FFF;padding:20px;margin-bottom:10px;}
+        .recipe-section h3{font-size:1.1em;color:#1F2937;margin:0 0 15px 0;font-weight:600;border-bottom:1px solid #F5F5F7;padding-bottom:8px;}
+        .recipe-section ul, .recipe-section ol{margin:0;padding-left:20px;color:#334155;line-height:1.6;}
+        .recipe-section li{margin-bottom:10px;}
+        .recipe-section li.owned{font-weight:600;color:#05603A;} /* Highlight owned ingredients */
+        .recipe-section li.owned::before{content:"✓ ";color:#34D399;font-weight:bold;} /* Checkmark */
+        .recipe-section ol li{margin-bottom:15px;}
+        .notes-section p{font-size:.9em;color:#6B7280;line-height:1.5;font-style:italic;}
+    </style>
+</head>
+<body>
+    <div class="phone-mockup">
+         <div class="app-header">
+             <button class="back-button" title="Back">←</button>
+             <h1>Spicy Chicken Lunch</h1>
+             <button class="action-button" title="Save Recipe"></button> <!-- Save/Bookmark icon -->
+        </div>
+        <div class="content-area">
+            <div class="recipe-title-card">
+                <h2>Spicy Chicken Lunch Bowl</h2>
+                <p class="description">A quick and flavorful bowl using leftover chicken, perfect for one serving.</p>
+            </div>
+
+            <div class="recipe-details">
+                <div class="detail-item"><span>Prep Time</span><strong>10 mins</strong></div>
+                <div class="detail-item"><span>Cook Time</span><strong>15 mins</strong></div>
+                <div class="detail-item"><span>Servings</span><strong>1</strong></div>
+            </div>
+
+            <div class="recipe-section">
+                <h3>Ingredients</h3>
+                <ul>
+                    <li class="owned">1/2 cup Cooked Chicken (shredded)</li>
+                    <li class="owned">1/4 cup Baby Spinach</li>
+                    <li>1/4 cup Cooked Quinoa (or rice)</li>
+                    <li>1 tbsp Olive Oil</li>
+                    <li class="owned">1 clove Garlic (minced)</li>
+                    <li>1/4 tsp Red Pepper Flakes</li>
+                    <li>1 tbsp Soy Sauce (or tamari)</li>
+                    <li>1 tsp Sriracha (or hot sauce)</li>
+                    <li>Salt and Pepper to taste</li>
+                    <li>Optional: Sesame seeds, sliced green onion</li>
+                </ul>
+            </div>
+
+             <div class="recipe-section">
+                <h3>Instructions</h3>
+                <ol>
+                    <li>Heat olive oil in a small skillet over medium heat. Add minced garlic and red pepper flakes, cook until fragrant (about 30 seconds).</li>
+                    <li>Add the shredded cooked chicken to the skillet. Stir to coat with oil and spices. Cook for 2-3 minutes until heated through.</li>
+                    <li>Stir in the soy sauce and sriracha. Cook for another minute.</li>
+                    <li>Add the baby spinach and cook just until wilted, about 1 minute more. Season with salt and pepper if needed.</li>
+                    <li>Assemble the bowl: Place the cooked quinoa in the bottom. Top with the spicy chicken and spinach mixture.</li>
+                    <li>Garnish with optional sesame seeds and green onion if desired. Serve immediately.</li>
+                </ol>
+            </div>
+
+             <div class="recipe-section notes-section">
+                <h3>Notes</h3>
+                <p>Make sure your quinoa or rice is pre-cooked. Adjust spice level by changing the amount of red pepper flakes and sriracha. Any leftover cooked veggies can be added in step 4.</p>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
