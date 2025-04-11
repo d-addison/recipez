@@ -127,10 +127,26 @@ This initial version uses the "Fresh & Clean" concept. The goal is a bright, mod
 *   **Light/Dark Mode:** This guide primarily describes the light mode. Dark mode implementation will require inverting base colors (e.g., `#1F2937` as background) and adjusting text/accent colors for appropriate contrast and visual appeal.
 *   **Consistency:** Apply colors according to their defined roles consistently across all screens.
 
-**Mockups:**
+## Mockups (Concept 1: Fresh & Clean)
 
-*   [Link to Mockup - Inventory Screen](./mockups/mockup_inventory.html)
-*   [Link to Mockup - Add Item Screen](./mockups/mockup_add_item.html)
-*   [Link to Mockup - Generate Screen](./mockups/mockup_generate.html)
-*   [Link to Mockup - Recipe Display Screen](./mockups/mockup_recipe_display.html)
-*   [Link to Mockup - Login Screen](./mockups/mockup_login.html)
+Here are visual mockups for key V1 screens. You can also view the [HTML source files](./mockups/).
+
+**Inventory Screen:**
+![Inventory Screen Mockup](./mockups/images/mockup_inventory.png)
+([HTML Source](./mockups/mockup_inventory.html))
+
+**Add Item Screen:**
+![Add Item Screen Mockup](./mockups/images/mockup_add_items.png)
+([HTML Source](./mockups/mockup_add_item.html))
+
+**Generate Recipe Screen:**
+![Generate Recipe Screen Mockup](./mockups/images/mockup_generate.png)
+([HTML Source](./mockups/mockup_generate.html))
+
+**Recipe Display Screen:**
+![Recipe Display Screen Mockup](./mockups/images/mockup_recipe_display.png)
+([HTML Source](./mockups/mockup_recipe_display.html))
+
+**Login Screen:**
+![Login Screen Mockup](./mockups/images/mockup_login.png)
+([HTML Source](./mockups/mockup_login.html))
