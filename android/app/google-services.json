@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "672700313920",
+    "project_id": "recipez-bc5ea",
+    "storage_bucket": "recipez-bc5ea.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:672700313920:android:1609aa1bc42acbe4794aa5",
+        "android_client_info": {
+          "package_name": "com.recipez"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyALdGhI7pi-8_fSsIwiv6i6Cl4nGK6phv0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
