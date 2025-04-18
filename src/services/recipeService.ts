@@ -1,6 +1,8 @@
 import {firebaseFunctions, firebaseFirestore} from './firebase';
 import {RecipeData} from '../types';
-import firestore from '@react-native-firebase/firestore';
+import firestore, {
+  FirebaseFirestoreTypes,
+} from '@react-native-firebase/firestore';
 
 export const callGenerateRecipe = async (
   prompt: string,
@@ -113,5 +115,86 @@ export const saveRecipeToDefaultBoard = async (
   } catch (error: any) {
     console.error('Error saving recipe:', error);
     throw new Error('Failed to save the recipe to your board.');
+  }
+};
+
+// Function to fetch recipes linked to a specific board
+export const fetchRecipesFromBoard = async (
+  boardId: string,
+): Promise<RecipeData[]> => {
+  if (!boardId) {
+    console.warn('fetchRecipesFromBoard called without boardId.');
+    return [];
+  }
+  console.log(`Fetching recipes for board ID: ${boardId}`);
+
+  try {
+    const boardRecipesSnapshot = await firebaseFirestore
+      .collection('boards')
+      .doc(boardId)
+      .collection('boardRecipes')
+      .orderBy('addedAt', 'desc')
+      .get();
+
+    if (boardRecipesSnapshot.empty) {
+      console.log(`No recipe links found in board ${boardId}.`);
+      return [];
+    }
+
+    const recipeFetchPromises: Promise<FirebaseFirestoreTypes.DocumentSnapshot>[] =
+      [];
+    boardRecipesSnapshot.forEach(doc => {
+      const boardRecipeData = doc.data();
+
+      // --- FIX: Replace instanceof with duck typing ---
+      if (
+        boardRecipeData?.recipeRef &&
+        typeof boardRecipeData.recipeRef.path === 'string' && // Check for path property
+        typeof boardRecipeData.recipeRef.get === 'function' // Check for get method
+      ) {
+        // Assume it's a valid DocumentReference if it has path and get()
+        recipeFetchPromises.push(boardRecipeData.recipeRef.get());
+      } else {
+        console.warn(
+          `Invalid or missing recipeRef in boardRecipes doc: ${doc.id} for board ${boardId}. Found:`,
+          boardRecipeData?.recipeRef,
+        );
+      }
+      // --- End of FIX ---
+    });
+
+    // Prevent Promise.all([]) on empty valid refs which throws no error but is pointless
+    if (recipeFetchPromises.length === 0) {
+      console.log('No valid recipe references found to fetch.');
+      return [];
+    }
+
+    const recipeSnapshots = await Promise.all(recipeFetchPromises);
+
+    const fetchedRecipes: RecipeData[] = [];
+    recipeSnapshots.forEach(recipeDoc => {
+      if (recipeDoc.exists) {
+        const recipeData = recipeDoc.data() as Omit<RecipeData, 'id'>;
+        fetchedRecipes.push({
+          ...recipeData,
+          id: recipeDoc.id,
+          // Convert timestamps if necessary for your RecipeData type
+          // createdAt: (recipeData.createdAt as FirebaseFirestoreTypes.Timestamp)?.toDate(),
+        });
+      } else {
+        console.warn(
+          `Referenced recipe document (Path: ${recipeDoc.ref.path}) does not exist.`,
+        );
+      }
+    });
+
+    console.log(
+      `Successfully fetched ${fetchedRecipes.length} recipes for board ${boardId}.`,
+    );
+    return fetchedRecipes;
+  } catch (error: any) {
+    // Log the specific error before throwing a generic one
+    console.error(`Error fetching recipes from board ${boardId}:`, error);
+    throw new Error('Failed to load your saved recipes. Please try again.');
   }
 };

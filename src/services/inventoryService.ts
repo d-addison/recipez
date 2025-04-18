@@ -2,7 +2,8 @@
 
 import {firebaseFirestore} from './firebase'; // Import initialized Firestore instance
 import {InventoryItem, InventoryCategory} from '../types'; // Import necessary types
-import firestore from '@react-native-firebase/firestore'; // Import Firestore package for types like Timestamp and FieldValue
+import {firebase} from '@react-native-firebase/firestore';
+const {Timestamp} = firebase.firestore;
 
 /**
  * Helper function to get the Firestore collection reference for a specific user's inventory.
@@ -56,9 +57,9 @@ export const fetchUserInventory = async (
           ? (data.category as InventoryCategory)
           : 'pantry'; // Default to pantry
       const createdAt =
-        data.createdAt instanceof firestore.Timestamp
-          ? data.createdAt.toDate()
-          : new Date(); // Convert Timestamp or use current date
+        data.createdAt instanceof Timestamp
+          ? data.createdAt
+          : Timestamp.fromDate(new Date()); // Keep as Timestamp or create new one
 
       return {
         id: doc.id, // Use the document ID as the item ID
@@ -103,7 +104,7 @@ export const addInventoryItem = async (
     name: itemData.name.trim(), // Trim whitespace
     quantity: itemData.quantity?.trim() || '', // Trim or default to empty string
     category: itemData.category,
-    createdAt: firestore.FieldValue.serverTimestamp(), // Use server timestamp for creation time
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(), // Use server timestamp for creation time
   };
 
   try {

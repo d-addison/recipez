@@ -6,7 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  TouchableOpacity,
+  Pressable, // Import Pressable
 } from 'react-native';
 import {useFocusEffect} from '@react-navigation/native'; // Import useFocusEffect
 import {useInventoryStore} from '../../store/inventoryStore';
@@ -35,20 +35,22 @@ const CategoryTabs = ({
     fridge: 'snow-outline',
     pantry: 'file-tray-full-outline',
     freezer: 'cube-outline', // Could be better
-    tools: 'construct-outline',
+    tools: 'build-outline', // Updated icon
   };
 
   return (
     <View style={styles.tabBar}>
       {categories.map(cat => (
-        <TouchableOpacity
+        <Pressable
           key={cat}
-          style={[
+          style={({pressed}) => [
             styles.tabItem,
             selectedCategory === cat && styles.tabItemActive,
+            pressed && styles.tabItemPressed, // Add pressed style for tabs
           ]}
           onPress={() => onSelectCategory(cat)}
-          activeOpacity={0.7}>
+          android_ripple={{color: '#eee', borderless: false}} // Subtle ripple for tabs
+        >
           <Icon
             name={categoryIcons[cat]}
             size={22}
@@ -61,7 +63,7 @@ const CategoryTabs = ({
             ]}>
             {cat.charAt(0).toUpperCase() + cat.slice(1)}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       ))}
     </View>
   );
@@ -92,7 +94,9 @@ const InventoryScreen: React.FC<InventoryScreenProps> = ({navigation}) => {
 
   // Navigate to Add/Edit screen for editing
   const handleEdit = (item: InventoryItem) => {
-    navigation.navigate(ROUTES.ADD_EDIT_ITEM, {item}); // Pass item data for editing
+    console.log('Editing item:', item);
+    // Pass item data for editing when navigating
+    navigation.navigate(ROUTES.ADD_EDIT_ITEM as any);
   };
 
   // Show confirmation alert before deleting
@@ -133,19 +137,26 @@ const InventoryScreen: React.FC<InventoryScreenProps> = ({navigation}) => {
       </View>
       {/* Action Buttons */}
       <View style={styles.itemActions}>
-        <TouchableOpacity
+        <Pressable
           onPress={() => handleEdit(item)}
-          style={styles.actionButton}
-          hitSlop={{top: 10, bottom: 10, left: 10, right: 5}}>
+          style={({pressed}) => [
+            styles.actionButton,
+            pressed && styles.buttonPressed,
+          ]}
+          hitSlop={{top: 10, bottom: 10, left: 10, right: 5}}
+          android_ripple={{color: '#ccc', borderless: true}}>
           <Icon name="pencil-outline" size={20} color="#94A3B8" />
-        </TouchableOpacity>
-        <TouchableOpacity
+        </Pressable>
+        <Pressable
           onPress={() => handleDelete(item)}
-          style={styles.actionButton}
-          hitSlop={{top: 10, bottom: 10, left: 5, right: 10}}>
-          <Icon name="trash-outline" size={20} color="#DC2626" />{' '}
-          {/* Red for delete */}
-        </TouchableOpacity>
+          style={({pressed}) => [
+            styles.actionButton,
+            pressed && styles.buttonPressed,
+          ]}
+          hitSlop={{top: 10, bottom: 10, left: 5, right: 10}}
+          android_ripple={{color: '#ccc', borderless: true}}>
+          <Icon name="trash-outline" size={20} color="#DC2626" />
+        </Pressable>
       </View>
     </View>
   );
@@ -194,12 +205,13 @@ const InventoryScreen: React.FC<InventoryScreenProps> = ({navigation}) => {
       )}
 
       {/* Floating Action Button to Add Item */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate(ROUTES.ADD_EDIT_ITEM, {})} // Pass empty object for 'add' mode
-        activeOpacity={0.8}>
+      <Pressable
+        // Navigate without params for 'add' mode
+        onPress={() => navigation.navigate(ROUTES.ADD_EDIT_ITEM as any)}
+        style={({pressed}) => [styles.fab, pressed && styles.buttonPressed]}
+        android_ripple={{color: '#fff', borderless: true}}>
         <Icon name="add-outline" size={30} color="#FFFFFF" />
-      </TouchableOpacity>
+      </Pressable>
     </View>
   );
 };
@@ -223,6 +235,10 @@ const styles = StyleSheet.create({
   tabItemActive: {borderBottomColor: '#34D399'}, // Green underline for active tab
   tabText: {color: '#94A3B8', fontWeight: '500', fontSize: 13, marginTop: 4}, // Gray text for inactive
   tabTextActive: {color: '#34D399', fontWeight: '600'}, // Green text for active
+  tabItemPressed: {
+    // Style for when a tab is pressed
+    backgroundColor: 'rgba(0, 0, 0, 0.05)', // Very light grey feedback
+  },
   loader: {flex: 1, justifyContent: 'center', alignItems: 'center'}, // Center loader if list is empty
   errorText: {
     color: '#DC2626',
@@ -285,7 +301,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  // FAB text style removed as we use Icon now
+  // Style for pressed state feedback (e.g., opacity)
+  buttonPressed: {
+    opacity: 0.7,
+  },
 });
 
 export default InventoryScreen;

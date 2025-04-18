@@ -1,0 +1,60 @@
+[debug] [2025-04-18T02:02:13.259Z] ----------------------------------------------------------------------
+[debug] [2025-04-18T02:02:13.260Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\David\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions
+[debug] [2025-04-18T02:02:13.261Z] CLI Version:   14.1.0
+[debug] [2025-04-18T02:02:13.261Z] Platform:      win32
+[debug] [2025-04-18T02:02:13.261Z] Node Version:  v22.14.0
+[debug] [2025-04-18T02:02:13.261Z] Time:          Thu Apr 17 2025 22:02:13 GMT-0400 (Eastern Daylight Saving Time)
+[debug] [2025-04-18T02:02:13.261Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-18T02:02:13.355Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-04-18T02:02:13.357Z] > authorizing via signed-in user (rentedzone@gmail.com)
+[debug] [2025-04-18T02:02:13.357Z] [iam] checking project recipez-bc5ea for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2025-04-18T02:02:13.358Z] Checked if tokens are valid: false, expires at: 1744939451427
+[debug] [2025-04-18T02:02:13.358Z] Checked if tokens are valid: false, expires at: 1744939451427
+[debug] [2025-04-18T02:02:13.358Z] > refreshing access token with scopes: []
+[debug] [2025-04-18T02:02:13.359Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-04-18T02:02:13.359Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-18T02:02:13.492Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-04-18T02:02:13.492Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-04-18T02:02:13.500Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/recipez-bc5ea:testIamPermissions [none]
+[debug] [2025-04-18T02:02:13.500Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/recipez-bc5ea:testIamPermissions x-goog-quota-user=projects/recipez-bc5ea
+[debug] [2025-04-18T02:02:13.500Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/recipez-bc5ea:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-04-18T02:02:13.738Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/recipez-bc5ea:testIamPermissions 200
+[debug] [2025-04-18T02:02:13.738Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/recipez-bc5ea:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2025-04-18T02:02:13.738Z] Checked if tokens are valid: true, expires at: 1744945332492
+[debug] [2025-04-18T02:02:13.738Z] Checked if tokens are valid: true, expires at: 1744945332492
+[debug] [2025-04-18T02:02:13.738Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/recipez-bc5ea/serviceAccounts/recipez-bc5ea@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2025-04-18T02:02:13.738Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/recipez-bc5ea/serviceAccounts/recipez-bc5ea@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2025-04-18T02:02:13.991Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/recipez-bc5ea/serviceAccounts/recipez-bc5ea@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2025-04-18T02:02:13.991Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/recipez-bc5ea/serviceAccounts/recipez-bc5ea@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'recipez-bc5ea'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run build
+[info] +  functions: Finished running predeploy script. 
+[debug] [2025-04-18T02:02:15.495Z] Checked if tokens are valid: true, expires at: 1744945332492
+[debug] [2025-04-18T02:02:15.495Z] Checked if tokens are valid: true, expires at: 1744945332492
+[debug] [2025-04-18T02:02:15.495Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/recipez-bc5ea [none]
+[debug] [2025-04-18T02:02:15.578Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/recipez-bc5ea 200
+[debug] [2025-04-18T02:02:15.578Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/recipez-bc5ea {"projectNumber":"672700313920","projectId":"recipez-bc5ea","lifecycleState":"ACTIVE","name":"recipez","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-04-12T12:56:55.287218Z"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[debug] [2025-04-18T02:02:15.579Z] Checked if tokens are valid: true, expires at: 1744945332492
+[debug] [2025-04-18T02:02:15.579Z] Checked if tokens are valid: true, expires at: 1744945332492
+[debug] [2025-04-18T02:02:15.579Z] Checked if tokens are valid: true, expires at: 1744945332492
+[debug] [2025-04-18T02:02:15.579Z] Checked if tokens are valid: true, expires at: 1744945332492
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[debug] [2025-04-18T02:02:15.580Z] Checked if tokens are valid: true, expires at: 1744945332492
+[debug] [2025-04-18T02:02:15.580Z] Checked if tokens are valid: true, expires at: 1744945332492
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2025-04-18T02:02:15.580Z] Checked if tokens are valid: true, expires at: 1744945332492
+[debug] [2025-04-18T02:02:15.580Z] Checked if tokens are valid: true, expires at: 1744945332492
+[debug] [2025-04-18T02:02:15.580Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/recipez-bc5ea/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-04-18T02:02:15.580Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/recipez-bc5ea/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/recipez-bc5ea
+[debug] [2025-04-18T02:02:15.581Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/recipez-bc5ea/services/runtimeconfig.googleapis.com [none]
+[debug] [2025-04-18T02:02:15.581Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/recipez-bc5ea/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/recipez-bc5ea
+[debug] [2025-04-18T02:02:15.581Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/recipez-bc5ea/services/cloudbuild.googleapis.com [none]
+[debug] [2025-04-18T02:02:15.581Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/recipez-bc5ea/services/cloudbuild.googleapis.com x-goog-quota-user=projects/recipez-bc5ea
+[debug] [2025-04-18T02:02:15.582Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/recipez-bc5ea/services/artifactregistry.googleapis.com [none]
+[debug] [2025-04-18T02:02:15.582Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/recipez-bc5ea/services/artifactregistry.googleapis.com x-goog-quota-user=projects/recipez-bc5ea

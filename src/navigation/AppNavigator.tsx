@@ -35,7 +35,6 @@ const MainNavigator = () => {
         options={{
           headerShown: true,
           title: 'Add/Edit Item', // Title set dynamically in screen, this is fallback
-          headerBackTitleVisible: false, // Common iOS pattern
           headerTintColor: '#1F2937', // Example color for back arrow/title
         }}
       />
@@ -45,7 +44,6 @@ const MainNavigator = () => {
         options={{
           headerShown: true,
           // Title is set dynamically in the screen component based on recipe
-          headerBackTitleVisible: false,
           headerTintColor: '#1F2937',
           // Save button added dynamically in screen component headerRight
         }}
@@ -60,7 +58,7 @@ const MainNavigator = () => {
  */
 const AppNavigator = () => {
   // Get required state and actions from the Zustand auth store
-  const {firebaseUser, isLoading, checkAuthState, userProfile} = useAuthStore();
+  const {firebaseUser, isLoading, checkAuthState} = useAuthStore();
 
   useEffect(() => {
     console.log('AppNavigator Mounted: Setting up Auth Listener...');

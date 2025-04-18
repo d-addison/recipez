@@ -1,4 +1,4 @@
-import firestore from '@react-native-firebase/firestore';
+import {Timestamp} from 'firebase/firestore';
 
 export interface UserProfile {
   uid: string; // From Auth, matches document ID
@@ -8,6 +8,6 @@ export interface UserProfile {
   profilePictureUrl?: string | null;
   bio?: string | null;
   defaultBoardId: string; // ID of the user's default "My Saved Recipes" board
-  createdAt: Date | firestore.Timestamp; // Can be Date or Timestamp type
+  createdAt: Timestamp; // Can be Date or Timestamp type
   // Counts etc will be added later
 }

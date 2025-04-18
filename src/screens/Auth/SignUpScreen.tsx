@@ -1,18 +1,15 @@
 import React, {useState} from 'react';
 import {
-  View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   ActivityIndicator,
   Alert,
   ScrollView,
-  TouchableOpacity,
+  Pressable, // Import Pressable
 } from 'react-native';
 import type {SignUpScreenProps} from '../../navigation/navigationTypes';
 import {useAuthStore} from '../../store/authStore';
-import {ROUTES} from '../../constants/routes';
 
 const SignUpScreen: React.FC<SignUpScreenProps> = ({navigation}) => {
   // State for form inputs
@@ -22,12 +19,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({navigation}) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Get state and actions from Zustand store
-  const {signup, isLoading, error} = useAuthStore(state => ({
-    signup: state.signup,
-    isLoading: state.isLoading,
-    error: state.error,
-  }));
+  // --- CORRECTED STATE SELECTION ---
+  // Get state and actions from Zustand store by selecting primitives individually
+  const signup = useAuthStore(state => state.signup);
+  const isLoading = useAuthStore(state => state.isLoading);
+  const error = useAuthStore(state => state.error);
+  // ---------------------------------
 
   const handleSignUp = async () => {
     // --- Input Validation ---
@@ -35,7 +32,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({navigation}) => {
       !displayName.trim() ||
       !username.trim() ||
       !email.trim() ||
-      !password ||
+      !password || // Keep password check as is (don't trim)
       !confirmPassword
     ) {
       Alert.alert('Missing Information', 'Please fill in all fields.');
@@ -61,9 +58,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({navigation}) => {
     // --- Call Signup Action ---
     const success = await signup(
       displayName.trim(),
-      username.trim(),
+      username.trim(), // Already formatted, but trim just in case
       email.trim(),
-      password,
+      password, // Pass original password
     );
 
     if (!success) {
@@ -145,22 +142,30 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({navigation}) => {
       ) : (
         <>
           {/* Primary sign up button */}
-          <TouchableOpacity
-            style={styles.buttonPrimary}
+          <Pressable
             onPress={handleSignUp}
-            disabled={isLoading}>
+            disabled={isLoading}
+            // Apply visual feedback on press
+            style={({pressed}) => [
+              styles.buttonPrimary,
+              pressed && styles.buttonPressed, // Style for pressed state
+              isLoading && styles.buttonDisabled, // Keep disabled style logic
+            ]}>
             <Text style={styles.buttonTextPrimary}>Sign Up</Text>
-          </TouchableOpacity>
+          </Pressable>
 
           {/* Secondary action link */}
-          <TouchableOpacity
-            style={styles.buttonSecondary}
+          <Pressable
+            style={({pressed}) => [
+              styles.buttonSecondary,
+              pressed && styles.buttonPressed,
+            ]}
             onPress={goToLogin}
             disabled={isLoading}>
             <Text style={styles.buttonTextSecondary}>
               Already have an account? Login
             </Text>
-          </TouchableOpacity>
+          </Pressable>
         </>
       )}
     </ScrollView>
@@ -231,6 +236,14 @@ const styles = StyleSheet.create({
     color: '#34D399',
     fontSize: 14,
     fontWeight: '500',
+  },
+  // Style for pressed state feedback (e.g., opacity)
+  buttonPressed: {
+    opacity: 0.7,
+  },
+  // Style for disabled state (can be combined with base style or used separately)
+  buttonDisabled: {
+    opacity: 0.5, // Example disabled style
   },
 });
 

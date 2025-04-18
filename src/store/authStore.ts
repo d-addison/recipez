@@ -8,7 +8,7 @@ import {
   onAuthStateChangedWrapper,
   getUserProfile,
   createDefaultBoard,
-} from '../services/authService'; // Add new service imports
+} from '../services/authServices'; // Add new service imports
 import {useInventoryStore} from './inventoryStore'; // Import inventory store
 
 interface AuthState {

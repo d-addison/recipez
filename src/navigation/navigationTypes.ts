@@ -26,7 +26,7 @@ export type MainTabParamList = {
 // Main Stack (The Tabs Navigator + Screens pushed over tabs like AddEditItem, RecipeDisplay)
 export type MainStackParamList = {
   [ROUTES.MAIN_TAB_NAVIGATOR]: NavigatorScreenParams<MainTabParamList>; // The nested tabs
-  [ROUTES.ADD_EDIT_ITEM]: {item?: InventoryItem}; // Optional item for editing
+  [ROUTES.ADD_EDIT_ITEM]: {item: InventoryItem}; // Optional item for editing
   [ROUTES.RECIPE_DISPLAY]: {recipe: RecipeData}; // Pass generated recipe data
 };
 

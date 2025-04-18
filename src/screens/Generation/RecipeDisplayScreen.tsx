@@ -1,150 +1,199 @@
-import React, {useMemo, useEffect, useState} from 'react';
+import React, {useMemo, useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
-  Button,
   ActivityIndicator,
   Alert,
-  TouchableOpacity,
   Share,
+  Pressable,
 } from 'react-native';
-import type {RecipeDisplayScreenProps} from '../../navigation/navigationTypes';
-import {useInventoryStore} from '../../store/inventoryStore';
-import {useRecipeStore} from '../../store/recipeStore'; // To save
-import Icon from 'react-native-vector-icons/Ionicons'; // For icons
+import type {RecipeData} from '../../types/Recipe'; // Adjust path as needed
+import type {RecipeDisplayScreenProps} from '../../navigation/navigationTypes'; // Adjust path as needed
+import {useInventoryStore} from '../../store/inventoryStore'; // Adjust path as needed
+import {useRecipeStore} from '../../store/recipeStore'; // Adjust path as needed
+import Icon from 'react-native-vector-icons/Ionicons';
 
+// --- Header Buttons Component (Remains the same) ---
+const HeaderButtons = ({
+  onShare,
+  onSave,
+  isSaving,
+  hasBeenSaved,
+}: {
+  onShare: () => void;
+  onSave: () => void;
+  isSaving: boolean;
+  hasBeenSaved: boolean;
+}) => (
+  <View style={styles.headerButtons}>
+    <Pressable
+      onPress={onShare}
+      style={({pressed}) => [
+        styles.headerButton,
+        pressed && styles.buttonPressed,
+      ]}
+      disabled={isSaving}
+      android_ripple={{color: '#ccc', borderless: true}}>
+      <Icon name="share-social-outline" size={24} color="#34D399" />
+    </Pressable>
+    {isSaving ? (
+      <ActivityIndicator color="#34D399" style={styles.headerLoader} />
+    ) : (
+      <Pressable
+        onPress={onSave}
+        style={({pressed}) => [
+          styles.headerButton,
+          pressed && styles.buttonPressed,
+        ]}
+        disabled={hasBeenSaved}
+        android_ripple={{color: '#ccc', borderless: true}}>
+        <Icon
+          name={hasBeenSaved ? 'bookmark' : 'bookmark-outline'}
+          size={24}
+          color={hasBeenSaved ? '#065F46' : '#34D399'}
+        />
+      </Pressable>
+    )}
+  </View>
+);
+
+// --- Main Screen Component ---
 const RecipeDisplayScreen: React.FC<RecipeDisplayScreenProps> = ({
   route,
   navigation,
 }) => {
-  // Get the recipe passed via navigation parameters
-  const {recipe} = route.params;
-  // Get inventory items to check for owned ingredients
+  // --- State and Store Hooks ---
+  const recipe = route.params?.recipe as RecipeData | undefined;
   const {inventoryItems} = useInventoryStore();
-  // Get save action and state from recipe store
-  const {saveCurrentRecipe, isSaving, saveError} = useRecipeStore(state => ({
-    saveCurrentRecipe: state.saveCurrentRecipe,
-    isSaving: state.isSaving,
-    saveError: state.saveError,
-  }));
 
-  // Keep track if recipe has been saved in this session
+  // --- FIX: Select state individually from Zustand ---
+  const saveCurrentRecipe = useRecipeStore(state => state.saveCurrentRecipe);
+  const isSaving = useRecipeStore(state => state.isSaving);
+  const saveError = useRecipeStore(state => state.saveError);
+  // --- End of FIX ---
+
   const [hasBeenSaved, setHasBeenSaved] = useState(false);
 
-  // --- Owned Ingredient Logic ---
-  // Memoize the set of owned ingredient names (lowercase) for efficiency
-  const ownedIngredientNames = useMemo(() => {
-    console.log('Recalculating owned ingredients set'); // Check how often this runs
-    return new Set(inventoryItems.map(item => item.name.trim().toLowerCase()));
-  }, [inventoryItems]);
-
-  // Function to check if an ingredient line likely contains an owned item
-  const isIngredientOwned = (ingredientLine: string): boolean => {
-    const lineLower = ingredientLine.trim().toLowerCase();
-    // Basic check: see if any owned item name is a substring of the ingredient line
-    for (const ownedName of ownedIngredientNames) {
-      if (ownedName && lineLower.includes(ownedName)) {
-        return true;
-      }
+  // --- Memoized Callbacks for Actions (Remain the same) ---
+  const handleSave = useCallback(async () => {
+    if (!recipe) {
+      console.warn('Save attempted without a recipe.');
+      return;
     }
-    // TODO: More sophisticated matching could be added later (e.g., singular/plural, basic units)
-    return false;
-  };
-
-  // --- Actions ---
-  const handleSave = async () => {
+    if (hasBeenSaved) {
+      console.log('Recipe already saved.');
+      return;
+    }
+    // Now `saveCurrentRecipe` reference from the store is stable
     const success = await saveCurrentRecipe();
     if (success) {
       Alert.alert(
         'Recipe Saved!',
-        `"${recipe?.title}" has been added to your Recipe Book.`,
+        `"${recipe.title}" has been added to your Recipe Book.`,
       );
-      setHasBeenSaved(true); // Mark as saved for this session
-    } else {
-      // Access latest error state
-      Alert.alert(
-        'Error Saving',
-        useRecipeStore.getState().saveError || 'Could not save the recipe.',
-      );
+      setHasBeenSaved(true);
     }
-  };
+    // Error handled by useEffect below
+  }, [recipe, saveCurrentRecipe, hasBeenSaved]); // `saveCurrentRecipe` is now stable
 
-  const handleShare = async () => {
+  const handleShare = useCallback(async () => {
     if (!recipe) {
+      console.warn('Share attempted without a recipe.');
       return;
     }
     try {
-      // Basic text sharing
       const ingredientsText = recipe.ingredients?.join('\n- ');
       const instructionsText = recipe.instructions
         ?.map((step, i) => `${i + 1}. ${step}`)
         .join('\n');
-      const message = `Check out this recipe: ${recipe.title}\n\nIngredients:\n- ${ingredientsText}\n\nInstructions:\n${instructionsText}\n\nGenerated with RecipEz!`;
-
-      await Share.share({
-        message: message,
-        title: recipe.title, // Optional title for some platforms
-      });
+      const message = `Check out this recipe: ${
+        recipe.title
+      }\n\nIngredients:\n- ${ingredientsText || 'N/A'}\n\nInstructions:\n${
+        instructionsText || 'N/A'
+      }\n\nGenerated with RecipEz!`;
+      await Share.share({message: message, title: recipe.title});
     } catch (error: any) {
-      Alert.alert('Sharing Failed', error.message);
+      Alert.alert(
+        'Sharing Failed',
+        error.message || 'An unknown error occurred.',
+      );
     }
-  };
+  }, [recipe]);
+
+  // --- Owned Ingredient Logic (Remains the same, already memoized) ---
+  const ownedIngredientNames = useMemo(() => {
+    return new Set(inventoryItems.map(item => item.name.trim().toLowerCase()));
+  }, [inventoryItems]);
+
+  const isIngredientOwned = useCallback(
+    (ingredientLine: string): boolean => {
+      if (!ingredientLine) {
+        return false;
+      }
+      const lineLower = ingredientLine.trim().toLowerCase();
+      for (const ownedName of ownedIngredientNames) {
+        if (ownedName && lineLower.includes(ownedName)) {
+          return true;
+        }
+      }
+      return false;
+    },
+    [ownedIngredientNames],
+  );
+
+  // --- Memoize the render function for headerRight (Remains the same) ---
+  // Its dependencies `handleSave` and `isSaving` are now stable
+  const renderHeaderRight = useCallback(
+    () => (
+      <HeaderButtons
+        onShare={handleShare}
+        onSave={handleSave}
+        isSaving={isSaving} // `isSaving` is now stable unless value changes
+        hasBeenSaved={hasBeenSaved}
+      />
+    ),
+    [handleShare, handleSave, isSaving, hasBeenSaved], // Dependencies are now stable
+  );
 
   // --- Effects ---
-  // Set navigation options dynamically
+  // Update navigation options (Remains the same)
+  // `renderHeaderRight` dependency is now stable
   useEffect(() => {
+    if (!recipe) {
+      navigation.setOptions({
+        title: 'Loading Recipe...',
+        headerRight: undefined,
+      });
+      return;
+    }
     navigation.setOptions({
-      title: recipe?.title || 'Generated Recipe', // Set header title
-      headerRight: () => (
-        // Add Save and Share buttons to header
-        <View style={styles.headerButtons}>
-          {/* Share Button */}
-          <TouchableOpacity
-            onPress={handleShare}
-            style={styles.headerButton}
-            disabled={isSaving}>
-            <Icon name="share-social-outline" size={24} color="#34D399" />
-          </TouchableOpacity>
-          {/* Save Button or Loading Indicator */}
-          {isSaving ? (
-            <ActivityIndicator color="#34D399" style={styles.headerLoader} />
-          ) : (
-            <TouchableOpacity
-              onPress={handleSave}
-              style={styles.headerButton}
-              disabled={hasBeenSaved}>
-              <Icon
-                name={hasBeenSaved ? 'bookmark' : 'bookmark-outline'}
-                size={24}
-                color={hasBeenSaved ? '#34D399' : '#34D399'}
-              />
-            </TouchableOpacity>
-          )}
-        </View>
-      ),
+      title: recipe.title || 'Generated Recipe',
+      headerRight: renderHeaderRight, // Pass stable memoized function reference
     });
-  }, [navigation, recipe, handleSave, isSaving, hasBeenSaved, handleShare]); // Add dependencies
+  }, [navigation, recipe, renderHeaderRight]); // Dependencies are now stable
 
-  // Display error if saving failed after attempting
+  // Effect for handling save errors (Remains the same)
   useEffect(() => {
     if (saveError) {
-      // Optionally show an alert here too, or rely on a banner component
-      console.log('Save error state updated:', saveError);
+      console.error('Save Error:', saveError);
+      Alert.alert('Error Saving', saveError || 'Could not save the recipe.');
+      // Consider adding: useRecipeStore.getState().clearSaveError();
     }
   }, [saveError]);
 
-  // Render loading or message if recipe data is missing
+  // --- Render Logic (Remains the same) ---
   if (!recipe) {
+    console.log('RecipeDisplayScreen rendering without recipe data.');
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading recipe details...</Text>
+        <ActivityIndicator size="large" color="#34D399" />
+        <Text style={styles.loadingText}>Loading Recipe...</Text>
       </View>
     );
   }
 
-  // --- Render UI ---
   return (
     <ScrollView
       style={styles.container}
@@ -157,67 +206,83 @@ const RecipeDisplayScreen: React.FC<RecipeDisplayScreenProps> = ({
         )}
       </View>
 
-      {/* Details Bar (Prep, Cook, etc.) */}
+      {/* Details Bar */}
       <View style={styles.detailsBar}>
-        <View style={styles.detailItem}>
-          <Icon name="time-outline" size={16} color="#05603A" />
-          <Text style={styles.detailValue}>{recipe.prepTime || 'N/A'}</Text>
-          <Text style={styles.detailLabel}>Prep</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <Icon name="timer-outline" size={16} color="#05603A" />
-          <Text style={styles.detailValue}>{recipe.cookTime || 'N/A'}</Text>
-          <Text style={styles.detailLabel}>Cook</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <Icon name="restaurant-outline" size={16} color="#05603A" />
-          <Text style={styles.detailValue}>{recipe.servings || 'N/A'}</Text>
-          <Text style={styles.detailLabel}>Serves</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <Icon name="flash-outline" size={16} color="#05603A" />
-          <Text style={styles.detailValue}>{recipe.calories || 'N/A'}</Text>
-          <Text style={styles.detailLabel}>Calories</Text>
-        </View>
-        <View style={styles.detailItem}>
-          <Icon name="server-outline" size={16} color="#05603A" />
-          <Text style={styles.detailValue}>{recipe.difficulty || 'N/A'}</Text>
-          <Text style={styles.detailLabel}>Difficulty</Text>
-        </View>
+        {recipe.prepTime && (
+          <View style={styles.detailItem}>
+            <Icon name="time-outline" size={16} color="#05603A" />
+            <Text style={styles.detailValue}>{recipe.prepTime}</Text>
+            <Text style={styles.detailLabel}>Prep</Text>
+          </View>
+        )}
+        {recipe.cookTime && (
+          <View style={styles.detailItem}>
+            <Icon name="timer-outline" size={16} color="#05603A" />
+            <Text style={styles.detailValue}>{recipe.cookTime}</Text>
+            <Text style={styles.detailLabel}>Cook</Text>
+          </View>
+        )}
+        {recipe.servings && (
+          <View style={styles.detailItem}>
+            <Icon name="restaurant-outline" size={16} color="#05603A" />
+            <Text style={styles.detailValue}>{recipe.servings}</Text>
+            <Text style={styles.detailLabel}>Serves</Text>
+          </View>
+        )}
+        {recipe.calories && (
+          <View style={styles.detailItem}>
+            <Icon name="flash-outline" size={16} color="#05603A" />
+            <Text style={styles.detailValue}>{String(recipe.calories)}</Text>
+            <Text style={styles.detailLabel}>Calories</Text>
+          </View>
+        )}
+        {recipe.difficulty && (
+          <View style={styles.detailItem}>
+            <Icon name="server-outline" size={16} color="#05603A" />
+            <Text style={styles.detailValue}>{recipe.difficulty}</Text>
+            <Text style={styles.detailLabel}>Difficulty</Text>
+          </View>
+        )}
       </View>
 
       {/* Ingredients Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Ingredients</Text>
-        {recipe.ingredients?.map((ing, index) => {
-          const owned = isIngredientOwned(ing);
-          return (
-            <View key={index} style={styles.listItemContainer}>
-              <Icon
-                name={owned ? 'checkmark-circle' : 'ellipse-outline'}
-                size={18}
-                color={owned ? '#34D399' : '#9CA3AF'}
-                style={styles.listItemIcon}
-              />
-              <Text
-                style={[styles.listItemText, owned && styles.ownedItemText]}>
-                {ing}
-              </Text>
-            </View>
-          );
-        })}
-      </View>
+      {recipe.ingredients && recipe.ingredients.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Ingredients</Text>
+          {recipe.ingredients.map((ing, index) => {
+            const owned = isIngredientOwned(ing);
+            return (
+              <View
+                key={`ingredient-${index}`}
+                style={styles.listItemContainer}>
+                <Icon
+                  name={owned ? 'checkmark-circle' : 'ellipse-outline'}
+                  size={18}
+                  color={owned ? '#34D399' : '#9CA3AF'}
+                  style={styles.listItemIcon}
+                />
+                <Text
+                  style={[styles.listItemText, owned && styles.ownedItemText]}>
+                  {ing}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      )}
 
       {/* Instructions Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Instructions</Text>
-        {recipe.instructions?.map((step, index) => (
-          <View key={index} style={styles.stepItemContainer}>
-            <Text style={styles.stepNumber}>{index + 1}.</Text>
-            <Text style={styles.stepText}>{step}</Text>
-          </View>
-        ))}
-      </View>
+      {recipe.instructions && recipe.instructions.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Instructions</Text>
+          {recipe.instructions.map((step, index) => (
+            <View key={`instruction-${index}`} style={styles.stepItemContainer}>
+              <Text style={styles.stepNumber}>{index + 1}.</Text>
+              <Text style={styles.stepText}>{step}</Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Notes Section (Optional) */}
       {recipe.notes && (
@@ -230,11 +295,11 @@ const RecipeDisplayScreen: React.FC<RecipeDisplayScreenProps> = ({
   );
 };
 
-// Styles
+// --- Styles (Remain the same) ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB', // Use a very light gray or off-white
+    backgroundColor: '#F9FAFB', // Light gray background
   },
   contentContainer: {
     paddingBottom: 40, // Ensure space at the bottom
@@ -243,101 +308,112 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#6B7280', // Gray text
   },
   headerButtons: {
     flexDirection: 'row',
-    marginRight: 10,
+    marginRight: 10, // Adjust spacing as needed
+    alignItems: 'center',
   },
   headerButton: {
-    paddingHorizontal: 10, // Space out buttons
-    paddingVertical: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5, // Make touch area slightly larger
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerLoader: {
-    marginHorizontal: 15,
+    marginHorizontal: 10, // Consistent horizontal spacing with button
+    width: 24, // Match icon size approx
+    height: 24,
+  },
+  buttonPressed: {
+    opacity: 0.6, // Visual feedback for press
   },
   titleCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFFFFF', // White card background
     paddingVertical: 20,
     paddingHorizontal: 25,
-    // Removed margin, sections handle spacing now
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: '#F3F4F6', // Subtle border
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#1F2937', // Dark gray text
     marginBottom: 8,
-    lineHeight: 30,
+    lineHeight: 30, // Adjust line height for readability
   },
   description: {
     fontSize: 15,
-    color: '#6B7280',
+    color: '#6B7280', // Medium gray text
     lineHeight: 22,
   },
   detailsBar: {
     flexDirection: 'row',
-    justifyContent: 'space-around', // Distribute items
-    alignItems: 'flex-start', // Align items top
+    justifyContent: 'space-around',
+    alignItems: 'flex-start', // Align items to the top
     paddingVertical: 15,
     paddingHorizontal: 10,
     backgroundColor: '#F0FDF4', // Light green background
-    // borderBottomWidth: 1,
-    // borderBottomColor: '#D1FAE5',
+    flexWrap: 'wrap', // Allow items to wrap on smaller screens if needed
   },
   detailItem: {
     alignItems: 'center',
-    flex: 1, // Allow items to take equal space
+    minWidth: 60, // Give items some minimum width
     paddingHorizontal: 4, // Small horizontal padding
+    marginBottom: 10, // Add space if wrapping occurs
   },
   detailLabel: {
     fontSize: 11,
-    color: '#065F46', // Darker Green
+    color: '#065F46', // Darker green text
     textTransform: 'uppercase',
-    marginTop: 4, // Space below value
+    marginTop: 4,
     fontWeight: '500',
     textAlign: 'center',
   },
   detailValue: {
     fontSize: 13,
-    color: '#047857', // Medium Green
+    color: '#047857', // Medium green text
     fontWeight: '600',
-    marginTop: 2, // Space below icon
+    marginTop: 2,
     textAlign: 'center',
   },
   section: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FFFFFF', // White background for sections
     paddingVertical: 20,
     paddingHorizontal: 25,
     marginTop: 8, // Space between sections
+    borderTopWidth: 1,
+    borderTopColor: '#F3F4F6', // Subtle separator
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600', // Semibold
-    color: '#111827', // Near black
+    fontWeight: '600',
+    color: '#111827', // Very dark gray/black
     marginBottom: 18,
-    // borderBottomWidth: 1, // Optional divider line
-    // borderBottomColor: '#E5E7EB',
-    // paddingBottom: 8,
   },
   listItemContainer: {
     flexDirection: 'row',
-    alignItems: 'flex-start', // Align icon top
+    alignItems: 'flex-start', // Align icon with the start of the text line
     marginBottom: 10,
   },
   listItemIcon: {
     marginRight: 10,
-    marginTop: 2, // Align icon slightly better with text line
+    marginTop: 3, // Adjust vertical alignment with text
   },
   listItemText: {
     flex: 1, // Allow text to wrap
     fontSize: 16,
-    color: '#374151', // Gray 700
+    color: '#374151', // Dark text for readability
     lineHeight: 24,
   },
   ownedItemText: {
-    // fontWeight: '500', // Slightly bolder if owned
-    color: '#065F46', // Darker green for owned text
+    color: '#065F46', // Dark green for owned items
   },
   stepItemContainer: {
     flexDirection: 'row',
@@ -346,21 +422,22 @@ const styles = StyleSheet.create({
   },
   stepNumber: {
     fontSize: 16,
-    color: '#34D399', // Primary Green for step numbers
+    color: '#34D399', // Use accent color for step number
     fontWeight: 'bold',
     marginRight: 10,
-    width: 25, // Allocate fixed width
-    lineHeight: 24,
+    width: 25, // Fixed width for alignment
+    lineHeight: 24, // Match text line height
+    textAlign: 'right', // Align number to the right before the dot
   },
   stepText: {
-    flex: 1,
+    flex: 1, // Allow text to take remaining space and wrap
     fontSize: 16,
-    color: '#374151', // Gray 700
+    color: '#374151',
     lineHeight: 24,
   },
   notesText: {
     fontSize: 15,
-    color: '#4B5563', // Gray 600
+    color: '#4B5563', // Slightly lighter text for notes
     fontStyle: 'italic',
     lineHeight: 22,
   },

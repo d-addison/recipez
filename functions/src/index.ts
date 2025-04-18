@@ -7,89 +7,89 @@ import {
 } from '@google/generative-ai';
 import {RecipeData} from './types'; // Assuming types.ts exists in src
 
-// Initialize Firebase Admin SDK
+// Initialize Firebase Admin SDK (Safe in global scope)
 admin.initializeApp();
 const firestore = admin.firestore();
 
-// --- Gemini API Configuration ---
-let genAI: GoogleGenerativeAI | null = null;
-let model: any = null; // Use 'any' or define a proper type if available
-
-try {
-  // Access API key securely from environment configuration
-  const API_KEY = functions.config().gemini.key;
-  if (!API_KEY) {
-    console.error(
-      'FATAL ERROR: Gemini API Key not configured. Run \'firebase functions:config:set gemini.key="YOUR_API_KEY"\'',
-    );
-    // Optionally throw an error to prevent function deployment without a key
-    // throw new Error("Gemini API Key not set in Firebase Functions config.");
-  } else {
-    genAI = new GoogleGenerativeAI(API_KEY);
-
-    // Define safety settings - BLOCK_MEDIUM_AND_ABOVE is a reasonable default
-    const safetySettings = [
-      {
-        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-    ];
-
-    // Specify the Gemini model - use the latest available preview or stable model
-    // Check Google AI Studio or documentation for current model names
-    const modelName = 'gemini-1.5-pro-preview-0409'; // Example - Keep this updated
-    model = genAI.getGenerativeModel({model: modelName, safetySettings});
-    console.log(`Gemini model "${modelName}" initialized successfully.`);
-  }
-} catch (initError) {
-  console.error('Error initializing GoogleGenerativeAI:', initError);
-  // Handle initialization error, maybe prevent function execution later
-  genAI = null;
-  model = null;
-}
-
-// Configuration for requesting JSON output from Gemini
+// Configuration for requesting JSON output from Gemini (Safe in global scope)
 const generationConfig = {
   responseMimeType: 'application/json',
 };
 
 // --- Callable Cloud Function: generateRecipe ---
 export const generateRecipe = functions.https.onCall(
-  async (data, context): Promise<RecipeData> => {
+  async (request): Promise<RecipeData> => {
     // 1. Authentication Check
-    if (!context.auth) {
+    if (!request.auth) {
       console.error('Authentication Error: User is not authenticated.');
       throw new functions.https.HttpsError(
         'unauthenticated',
         'User must be authenticated to generate recipes.',
       );
     }
-    const userId = context.auth.uid;
+    const userId = request.auth.uid;
 
-    // Check if Gemini client initialized correctly
-    if (!genAI || !model) {
-      console.error('Gemini client not initialized. Cannot generate recipe.');
+    // --- Initialize Gemini Client and Model *INSIDE* the handler ---
+    let genAI: GoogleGenerativeAI;
+    let model: any; // Use 'any' or define a proper type if available
+
+    try {
+      // Access API key securely from *runtime* environment configuration
+      // Use functions.config() which is the standard way for keys set via CLI
+      const API_KEY = process.env.GEMINI_KEY; // Use optional chaining just in case
+
+      if (!API_KEY) {
+        // This error now happens at RUNTIME if the key is truly missing
+        console.error(
+          'Gemini API Key is missing in the runtime environment configuration.',
+        );
+        throw new functions.https.HttpsError(
+          'internal', // Use 'internal' for server config issues
+          'Recipe generation service is misconfigured.',
+        );
+      }
+
+      genAI = new GoogleGenerativeAI(API_KEY);
+
+      // Define safety settings
+      const safetySettings = [
+        {
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+        },
+      ];
+
+      // Specify the Gemini model
+      // const modelName = 'gemini-2.5-pro-preview-03-25'; // Example - Keep this updated
+      const modelName = 'gemini-2.5-pro-preview-03-25'; // Or 'gemini-1.5-pro-preview-0514' or 'gemini-pro'
+      model = genAI.getGenerativeModel({model: modelName, safetySettings});
+      console.log(
+        `Gemini model "${modelName}" initialized successfully for this invocation.`,
+      );
+    } catch (initError) {
+      console.error('Error initializing GoogleGenerativeAI:', initError);
       throw new functions.https.HttpsError(
         'internal',
-        'Recipe generation service is currently unavailable.',
+        'Failed to initialize the recipe generation service.',
       );
     }
+    // --- End Gemini Initialization ---
 
-    // 2. Input Validation
-    const userPrompt = data.prompt;
-    const timeConstraint = data.timeConstraint || 'any'; // Default to 'any'
+    // 2. Input Validation (Remains the same)
+    const userPrompt = request.data.prompt;
+    const timeConstraint = request.data.timeConstraint || 'any'; // Default to 'any'
 
     if (
       !userPrompt ||
@@ -113,14 +113,13 @@ export const generateRecipe = functions.https.onCall(
     );
 
     try {
-      // 3. Fetch User Inventory (Limit items to avoid excessive prompt length/cost)
+      // 3. Fetch User Inventory (Remains the same)
       const inventorySnapshot = await firestore
         .collection(`users/${userId}/inventory`)
         .limit(75)
-        .get(); // Increased limit slightly
+        .get();
       const inventoryItems = inventorySnapshot.docs.map(doc => {
         const itemData = doc.data();
-        // Only include name and quantity for brevity
         return `${itemData.name?.trim()}${
           itemData.quantity ? ` (${itemData.quantity.trim()})` : ''
         }`;
@@ -131,7 +130,7 @@ export const generateRecipe = functions.https.onCall(
           : 'nothing specific listed';
       console.log(`Including inventory: ${inventoryString}`);
 
-      // 4. Construct Detailed Prompt for Gemini
+      // 4. Construct Detailed Prompt for Gemini (Remains the same)
       const detailedPrompt = `
           You are RecipEz, an expert culinary assistant creating unique recipes.
           The user has provided the following ingredients they might have: ${inventoryString}.
@@ -167,25 +166,41 @@ export const generateRecipe = functions.https.onCall(
           - The entire output MUST be only the valid JSON object.
         `;
 
-      // 5. Call Gemini API with JSON configuration
+      // 5. Call Gemini API with JSON configuration (Remains the same)
       console.log('Sending request to Gemini API...');
       const result = await model.generateContent(
         detailedPrompt,
-        generationConfig,
+        generationConfig, // Use the globally defined config
       );
       const response = result.response;
-      console.log('Received response from Gemini.'); // Log that response was received
+      console.log('Received response from Gemini.');
 
       // 6. Process and Validate Gemini's Response
       const candidate = response?.candidates?.[0];
       if (candidate?.content?.parts?.[0]?.text) {
-        const jsonText = candidate.content.parts[0].text;
-        console.log('Raw JSON text received:', jsonText); // Log raw text for debugging
+        let jsonText = candidate.content.parts[0].text; // Get the raw text
+        console.log('Raw text received from Gemini:', jsonText); // Log raw text BEFORE cleanup
+
+        // --- Add Cleanup Logic ---
+        // Remove potential Markdown code block formatting
+        const jsonMatch = jsonText.match(/```json\s*([\s\S]*?)\s*```/); // Look for ```json ... ```
+        if (jsonMatch && jsonMatch[1]) {
+          console.log('Detected ```json block, extracting content.');
+          jsonText = jsonMatch[1]; // Use only the content inside the backticks
+        } else {
+          // Optional: Trim whitespace just in case Gemini added leading/trailing spaces
+          console.log('No ```json block detected, trimming whitespace.');
+          jsonText = jsonText.trim();
+        }
+        // --- End Cleanup Logic ---
+
+        console.log('Cleaned text before parsing:', jsonText); // Log cleaned text
 
         try {
-          const recipeJson: Partial<RecipeData> = JSON.parse(jsonText); // Parse the JSON
+          // Now parse the cleaned text
+          const recipeJson: Partial<RecipeData> = JSON.parse(jsonText);
 
-          // Basic Validation of the parsed JSON structure
+          // Basic Validation (remains the same)
           if (
             !recipeJson.title ||
             !recipeJson.ingredients ||
@@ -197,7 +212,7 @@ export const generateRecipe = functions.https.onCall(
             throw new Error('Generated recipe data is incomplete.');
           }
 
-          // Add model info for tracking
+          // Construct final object (remains the same)
           const fullRecipeData: RecipeData = {
             title: recipeJson.title,
             description: recipeJson.description || '',
@@ -209,29 +224,29 @@ export const generateRecipe = functions.https.onCall(
             ingredients: recipeJson.ingredients,
             instructions: recipeJson.instructions,
             notes: recipeJson.notes || null,
-            imageUrl: recipeJson.imageUrl || null, // Include if present
-            aiModelUsed: model.model || 'unknown', // Track the model used
+            imageUrl: recipeJson.imageUrl || null,
+            aiModelUsed: model.model || 'unknown',
           };
 
           console.log(
             `Successfully generated and parsed recipe: "${fullRecipeData.title}"`,
           );
-          return fullRecipeData; // Return the validated and typed recipe object
+          return fullRecipeData; // Return the validated recipe
         } catch (parseError) {
+          // Catch JSON.parse errors
           console.error(
-            'Failed to parse Gemini JSON response:',
+            'Failed to parse cleaned Gemini JSON response:', // Updated error message
             parseError,
-            'Raw Text:',
+            'Cleaned Text Attempted:', // Log the text we tried to parse
             jsonText,
           );
           throw new functions.https.HttpsError(
             'internal',
-            'Failed to process the recipe response format.',
-            {rawText: jsonText},
+            'Failed to process the recipe response format after cleanup.', // Updated message
+            {rawText: candidate.content.parts[0].text, cleanedText: jsonText}, // Provide both raw and cleaned text in details
           );
         }
       } else {
-        // Handle cases where Gemini blocked the request or gave an empty response
         const blockReason = candidate?.finishReason;
         const safetyRatings = JSON.stringify(candidate?.safetyRatings || {});
         console.error(
@@ -249,9 +264,8 @@ export const generateRecipe = functions.https.onCall(
     } catch (error: any) {
       console.error('Error executing generateRecipe function:', error);
       if (error instanceof functions.https.HttpsError) {
-        throw error; // Re-throw HttpsErrors directly
+        throw error;
       }
-      // Catch other potential errors (e.g., Firestore fetch error)
       throw new functions.https.HttpsError(
         'internal',
         'An unexpected error occurred while generating the recipe.',

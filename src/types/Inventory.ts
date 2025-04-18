@@ -1,3 +1,5 @@
+import {Timestamp} from 'firebase/firestore';
+
 export type InventoryCategory = 'fridge' | 'pantry' | 'freezer' | 'tools';
 
 export interface InventoryItem {
@@ -5,5 +7,5 @@ export interface InventoryItem {
   name: string;
   quantity: string;
   category: InventoryCategory;
-  createdAt: Date; // Or Firestore Timestamp type if preferred
+  createdAt: Timestamp;
 }

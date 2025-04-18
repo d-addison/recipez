@@ -3,13 +3,12 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
   ActivityIndicator,
   Alert,
   ScrollView,
-  TouchableOpacity,
   Platform,
+  Pressable, // Import Pressable
 } from 'react-native';
 // Using react-native-picker/picker is a common choice
 import {Picker} from '@react-native-picker/picker';
@@ -32,12 +31,13 @@ const GenerateRecipeScreen: React.FC<GenerateRecipeScreenProps> = ({
   const [prompt, setPrompt] = useState('');
   const [selectedTime, setSelectedTime] = useState<string>('any'); // Default to 'any'
 
-  // Get state and actions from recipe store
-  const {generateRecipe, isLoading, error} = useRecipeStore(state => ({
-    generateRecipe: state.generateRecipe,
-    isLoading: state.isLoading,
-    error: state.error,
-  }));
+  // --- CORRECTED STATE SELECTION ---
+  // Get state and actions from recipe store by selecting primitives individually
+  const generateRecipe = useRecipeStore(state => state.generateRecipe);
+  const isLoading = useRecipeStore(state => state.isLoading);
+  const error = useRecipeStore(state => state.error);
+  // Note: We get recipeResult later using getState() after generation completes
+  // ---------------------------------
 
   // Handle the generation process
   const handleGenerate = async () => {
@@ -53,12 +53,14 @@ const GenerateRecipeScreen: React.FC<GenerateRecipeScreenProps> = ({
     const success = await generateRecipe(prompt, selectedTime);
 
     // Check the store state *after* the promise resolves
-    const recipeResult = useRecipeStore.getState().generatedRecipe;
-    const generationError = useRecipeStore.getState().error;
+    const recipeResult = useRecipeStore.getState().generatedRecipe; // Get latest state
+    const generationError = useRecipeStore.getState().error; // Get latest state
 
     if (success && recipeResult) {
       // Navigate to display screen on success
+      // --- FIX: Pass the required parameters and remove 'as any' ---
       navigation.navigate(ROUTES.RECIPE_DISPLAY, {recipe: recipeResult});
+      // ------------------------------------------------------------
       // Optionally clear the form
       // setPrompt('');
       // setSelectedTime('any');
@@ -112,12 +114,17 @@ const GenerateRecipeScreen: React.FC<GenerateRecipeScreenProps> = ({
         {isLoading ? (
           <ActivityIndicator size="large" color="#34D399" />
         ) : (
-          <TouchableOpacity
-            style={styles.generateButton}
+          <Pressable
             onPress={handleGenerate}
-            disabled={isLoading}>
+            disabled={isLoading}
+            android_ripple={{color: '#fff'}} // White ripple on green button
+            style={({pressed}) => [
+              styles.generateButton,
+              pressed && styles.buttonPressed, // Style for pressed state
+              isLoading && styles.buttonDisabled, // Style for disabled state
+            ]}>
             <Text style={styles.generateButtonText}>Generate Recipe</Text>
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
     </ScrollView>
@@ -199,6 +206,13 @@ const styles = StyleSheet.create({
     color: '#FFFFFF', // White
     fontSize: 16,
     fontWeight: '600',
+  },
+  // Style for pressed state feedback (e.g., opacity)
+  buttonPressed: {
+    opacity: 0.8,
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
 });
 
